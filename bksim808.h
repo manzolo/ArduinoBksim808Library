@@ -1,5 +1,5 @@
 /*
-    sim800.h
+    BKSIM808.h
     A library for SeeedStudio seeeduino GPRS shield
 
     Copyright (c) 2013 seeed technology inc.
@@ -27,9 +27,8 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
 */
-
-#ifndef __SIM800_H__
-#define __SIM800_H__
+#ifndef __BKSIM808_H__
+#define __BKSIM808_H__
 
 #include "Arduino.h"
 #include <SoftwareSerial.h>
@@ -37,14 +36,14 @@
 #define TRUE                    1
 #define FALSE                   0
 
-#define SIM800_TX_PIN           10
-#define SIM800_RX_PIN           11
-#define SIM800_POWER_PIN        9
-#define SIM800_POWER_STATUS     12
+#define BKSIM808_TX_PIN           10
+#define BKSIM808_RX_PIN           11
+#define BKSIM808_POWER_PIN        9
+#define BKSIM808_POWER_STATUS     12
 
 #define UART_DEBUG
 
-#define DEBUGMODE FALSE
+#define DEBUGMODE false
 
 #ifdef UART_DEBUG
 #define ERROR(x)            if (DEBUGMODE) {Serial.print(x);}
@@ -55,8 +54,8 @@
 #endif
 
 #define DEFAULT_TIMEOUT     5
-/** SIM800 class.
-    Used for SIM800 communication. attention that SIM800 module communicate with MCU in serial protocol
+/** BKSIM808 class.
+    Used for BKSIM808 communication. attention that BKSIM808 module communicate with MCU in serial protocol
 */
 class BKSIM808
 {
@@ -64,18 +63,18 @@ class BKSIM808
 private:
     String gpsstate, gpstimegps, gpslatitude, gpslongitude;
 public:
-    /** Create SIM800 Instance
-        @param tx   uart transmit pin to communicate with SIM800
-        @param rx   uart receive pin to communicate with SIM800
+    /** Create BKSIM808 Instance
+        @param tx   uart transmit pin to communicate with BKSIM808
+        @param rx   uart receive pin to communicate with BKSIM808
         @param baudRate baud rate of uart communication
     */
-    BKSIM808(int baudRate): serialBKSIM808(SIM800_TX_PIN, SIM800_RX_PIN)
+    BKSIM808(int baudRate): serialBKSIM808(BKSIM808_TX_PIN, BKSIM808_RX_PIN)
     {
-        //powerPin = SIM800_POWER_PIN;
+        //powerPin = BKSIM808_POWER_PIN;
         //pinMode(powerPin, OUTPUT);
         serialBKSIM808.begin(baudRate);
     };
-    /** Power on SIM800
+    /** Power on BKSIM808
     */
     void preInit(void);
 
@@ -103,14 +102,14 @@ public:
 
     int gpsPowerOff(unsigned int timeout);
 
-    /** Check if SIM800 readable
+    /** Check if BKSIM808 readable
     */
     int checkReadable(void);
 
-    /** read from SIM800 module and save to buffer array
-        @param  buffer  buffer array to save what read from SIM800 module
-        @param  count   the maximal bytes number read from SIM800 module
-        @param  timeout time to wait for reading from SIM800 module
+    /** read from BKSIM808 module and save to buffer array
+        @param  buffer  buffer array to save what read from BKSIM808 module
+        @param  count   the maximal bytes number read from BKSIM808 module
+        @param  timeout time to wait for reading from BKSIM808 module
         @returns
             0 on success
             -1 on error
@@ -125,7 +124,7 @@ public:
     */
     void cleanBuffer(char* buffer, int count);
 
-    /** send AT command to SIM800 module
+    /** send AT command to BKSIM808 module
         @param cmd  command array which will be send to GPRS module
     */
     void sendCmd(const char* cmd);
@@ -133,18 +132,18 @@ public:
     void sendCmdTimeout(const char* cmd, unsigned int timeout = DEFAULT_TIMEOUT);
 
 
-    /** send "AT" to SIM800 module
+    /** send "AT" to BKSIM808 module
     */
     int sendATTest(void);
 
     void sendDump(void);
 
-    /** send '0x1A' to SIM800 Module
+    /** send '0x1A' to BKSIM808 Module
     */
     void sendEndMark(void);
 
-    /** check SIM800 module response before time out
-        @param  *resp   correct response which SIM800 module will return
+    /** check BKSIM808 module response before time out
+        @param  *resp   correct response which BKSIM808 module will return
         @param  *timeout    waiting seconds till timeout
         @returns
             0 on success

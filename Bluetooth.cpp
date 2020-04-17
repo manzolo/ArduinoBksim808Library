@@ -29,12 +29,11 @@
 */
 
 #include "Bluetooth.h"
-
 int BlueTooth::powerOn(void)
 {
     if(0 == bluetoothPower)
     {
-        if( 0 != sendCmdAndWaitForResp("AT+BTPOWER?\r\n", "OK\r\n", DEFAULT_TIMEOUT) )
+        if( 0 == sendCmdAndWaitForResp("AT+BTPOWER?\r\n", "OK\r\n", DEFAULT_TIMEOUT) )
         {
             if(0 != sendCmdAndWaitForResp("AT+BTPOWER=1\r\n", "OK\r\n", DEFAULT_TIMEOUT))
             {
@@ -43,13 +42,20 @@ int BlueTooth::powerOn(void)
             }
             else
             {
-                //while (sendCmdAndWaitForResp("AT+BTSTATUS?\r\n", "BTSTATUS: 5", DEFAULT_TIMEOUT) != 0);
+                //while (sendCmdAndWaitForResp("BTSTATUS: 5\r\nOK\r\n", "BTSTATUS: 5", DEFAULT_TIMEOUT) != 0);
+                clearSerial();
+                sendCmdAndWaitForResp("BTSTATUS?\r\n", "OK\r\n", 10);
+                clearSerial();
                 bluetoothPower = 1;
             }
         }
         else
-            //while (sendCmdAndWaitForResp("AT+BTSTATUS?\r\n", "BTSTATUS: 5", DEFAULT_TIMEOUT) != 0);
+        {
+            //while (sendCmdAndWaitForResp("BTSTATUS: 5\r\nOK\r\n", "BTSTATUS: 5", DEFAULT_TIMEOUT) != 0);
+            //sendCmdAndWaitForResp("BTSTATUS?\r\n", "BTSTATUS: 5", 50);
+            clearSerial();
             bluetoothPower = 1;
+        }
     }
     return 0;
 }
@@ -70,6 +76,7 @@ int BlueTooth::powerOff(void)
     }
     return 0;
 }
+
 int BlueTooth::getHostDeviceName(char* deviceName)
 {
     char gprsBuffer[40];
@@ -112,7 +119,7 @@ int BlueTooth::scanForTargetDeviceName(char* deviceName)
 
 int BlueTooth::scanForTargetDeviceAddress(char* deviceName)
 {
-    int bufferlen = 200;
+    int bufferlen = 2048;
     char gprsBuffer[bufferlen];
     char *s;
     cleanBuffer(gprsBuffer, bufferlen);
@@ -129,13 +136,15 @@ int BlueTooth::scanForTargetDeviceAddress(char* deviceName)
 
 int BlueTooth::getDeviceId(char* deviceName)
 {
-    int bufferlen = 200;
+    int bufferlen = 2048;
     char gprsBuffer[bufferlen];
     char *s;
     cleanBuffer(gprsBuffer, bufferlen);
+    clearSerial();
     sendCmd("AT+BTSTATUS?\r\n");
     //DEBUG(gprsBuffer);
-    readBuffer(gprsBuffer,bufferlen,10);//
+    readBuffer(gprsBuffer,bufferlen,10);//less than 10 sec connection problem
+    clearSerial();
     if(NULL == (s = strstr(gprsBuffer,deviceName)))
     {
         ERROR("\r\nERROR: scan For Target Device error\r\n");
@@ -166,7 +175,14 @@ int BlueTooth::sendPairingReqstToDevice(int deviceID, int pin)
         ERROR("\r\nERROR: AT+BTPAIR1\r\n");
         return -1;
     }
-    clearSerial();
+
+    /*if(0 != sendCmdAndWaitForResp("BTSTATUS?\r\n", "BTSTATUS: 0\r\n", 5))
+    {
+        ERROR("\r\nERROR: BTSTATUS?\r\n");
+        return -1;
+    }*/
+    //clearSerial pairing issue
+    //clearSerial();
     return 0;
 }
 int BlueTooth::unPair(int deviceID)
@@ -184,6 +200,7 @@ int BlueTooth::unPair(int deviceID)
 int BlueTooth::acceptPairing(void)
 {
     sendCmd("AT+BTPAIR=1,1\r\n");
+    clearSerial();
     return 0;
 }
 
@@ -245,17 +262,19 @@ int BlueTooth::loopHandle(void)
 
 int BlueTooth::connectInSPP(int deviceID)   //Serial Port Profile
 {
-    int BUFFER_LEN = 200;
-    char gprsBuffer[BUFFER_LEN];
+    int BUFFER_LEN = 1024;
+    char serialBuffer[BUFFER_LEN];
     char cmd[20];
     char* s;
 
-    delay(4000);
+    /*delay(1000);
+    clearSerial();
+    delay(1000);*/
     sprintf(cmd, "AT+BTGETPROF=%d\r\n", deviceID);
     sendCmd(cmd);
     //sendCmd("WAIT=4\r\n");
-    readBuffer(gprsBuffer, BUFFER_LEN, DEFAULT_TIMEOUT);
-    if (NULL == (s = strstr(gprsBuffer, "\"SPP\"")))
+    readBuffer(serialBuffer, BUFFER_LEN, DEFAULT_TIMEOUT);
+    if (NULL == (s = strstr(serialBuffer, "\"SPP\"")))
     {
         ERROR("\r\nERROR: No SPP Profile\r\n");
         return -1;
@@ -266,7 +285,7 @@ int BlueTooth::connectInSPP(int deviceID)   //Serial Port Profile
     }
     cleanBuffer(cmd, 20);
     sprintf(cmd, "AT+BTCONNECT=%d,%d\r\n", deviceID, 4);
-    if (0 != sendCmdAndWaitForResp(cmd, "OK", DEFAULT_TIMEOUT))
+    if (0 != sendCmdAndWaitForResp(cmd, "OK\r\n", DEFAULT_TIMEOUT))
     {
         ERROR("\r\nERROR:AT+BTCONNECT\r\n");
         return -1;

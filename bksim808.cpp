@@ -1,5 +1,5 @@
 /*
-    sim800.cpp
+    BKSIM808.cpp
     A library for SeeedStudio seeeduino GPRS shield
 
     Copyright (c) 2013 seeed technology inc.
@@ -32,30 +32,41 @@
 
 void BKSIM808::preInit(void)
 {
+    //sendCmd("AT+CSCLK=0\r\n");
     while (sendATTest() != 0);
+    while (sendCmdAndWaitForResp("AT+cpin?\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
+    sendCmd("WAIT=1\r\n");
+    while (sendCmdAndWaitForResp("AT+CLCK=\"SC\",2\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
+    //while (sendCmdAndWaitForResp("AT+BTSTATUS?\r\n", "BTSTATUS: 0\r\n", 60) != 0);
+    sendCmdTimeout("WAIT=6\r\n", 6);
+    clearSerial();
+    //while (sendCmdAndWaitForResp("AT\r\n", "Call Ready\r\n", 60) != 0);
+    //clearSerial();
+    while (sendCmdAndWaitForResp("AT\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
     clearSerial();
     if (DEBUGMODE)
     {
-        sendCmd("AT+CMEE=2\r\n");
-        clearSerial();
+        while (sendCmdAndWaitForResp("AT+CMEE=2\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
     }
-    while (sendCmdAndWaitForResp("AT+CGMR\r\n", "Revision:1418B02SIM808M32_BT", DEFAULT_TIMEOUT) != 0);
+
+    while (sendCmdAndWaitForResp("AT+CGMR\r\n", "Revision:1418B02SIM808M32_BT\r\n", DEFAULT_TIMEOUT) != 0);
+    //Reset all connection after reboot
     sendCmd("AT+BTPOWER?\r\n");
     clearSerial();
     sendCmd("AT+BTPOWER=0\r\n");
     clearSerial();
-    sendCmd("AT+BTPOWER=1\r\n");
-    clearSerial();
     sendCmd("AT+CGNSPWR=0\r\n");
     clearSerial();
     sendCmd("AT+SAPBR=0,1\r\n");
-    resetgpsinfo();
-    clearSerial();
+    //clearSerial();
+    //sendCmd("AT+CSCLK=1\r\n");
+
     //while (sendCmdAndWaitForResp("AT+BTSTATUS?\r\n", "BTSTATUS: 5", DEFAULT_TIMEOUT) != 0);
     if (DEBUGMODE)
     {
         DEBUG("BkSim808 ready...\r\n");
     }
+    //digitalWrite(powerPin, HIGH);
 }
 
 int BKSIM808::checkReadable(void)
@@ -107,16 +118,23 @@ void BKSIM808::resetgpsinfo()
 }
 int BKSIM808::gpsPowerOn(unsigned int timeout)
 {
-    clearSerial();
+    //clearSerial();
+    resetgpsinfo();
+
     if( 0 != sendCmdAndWaitForResp("AT+CGNSPWR=1\r\n", "OK\r\n", timeout) )
     {
-        if( 0 != sendCmdAndWaitForResp("AT+CGNSPWR?\r\n", "OK\r\n", timeout) )
-        {
-            ERROR("\r\nERROR:GpsPowerOn\r\n");
-            return -1;
-        }
+        //if( 0 != sendCmdAndWaitForResp("AT+CGNSPWR?\r\n", "OK\r\n", timeout) )
+        //{
+        ERROR("\r\nERROR:GpsPowerOn\r\n");
+        return -1;
+        //}
     }
-    delay(10000);
+
+    delay(35000);
+    //sendCmdAndWaitForResp("AT+CGNSSEQ?\r\n", "OK\r\n", timeout);  // Define the last NMEA sentence that parsed
+    //sendCmdAndWaitForResp("AT+CGNSSEQ=\"RMC\"\r\n", "OK\r\n", timeout);  // Define the last NMEA sentence that parsed
+    //sendCmdAndWaitForResp("AT+CGNSSEQ?\r\n", "OK\r\n", timeout); // Define the last NMEA sentence that parsed
+    clearSerial();
     //sendCmd("WAIT=6\r\n");
     return 0;
 }
@@ -126,11 +144,11 @@ int BKSIM808::gpsPowerOff(unsigned int timeout)
     clearSerial();
     if( 0 != sendCmdAndWaitForResp("AT+CGNSPWR=0\r\n", "OK\r\n", timeout) )
     {
-        if( 0 != sendCmdAndWaitForResp("AT+CGNSPWR?\r\n", "OK\r\n", timeout) )
-        {
-            ERROR("\r\nERROR:GpsPowerOff\r\n");
-            return -1;
-        }
+        //if( 0 != sendCmdAndWaitForResp("AT+CGNSPWR?\r\n", "OK\r\n", timeout) )
+        //{
+        ERROR("\r\nERROR:GpsPowerOff\r\n");
+        return -1;
+        //}
     }
     delay(1000);
     return 0;
@@ -172,24 +190,21 @@ int BKSIM808::getGpsData(const int timeout)
 {
     String data[5];
     long int time = millis();
-    long int maxloop = 32767;
-    long int idxmaxloop =0;
     int i = 0;
 
     delay(500);
-    clearSerial();
+    //clearSerial();
     sendCmd("AT+CGNSINF\r\n");
 
     while ((time + (timeout * 1000)) > millis())
     {
-        idxmaxloop++;
         while (serialBKSIM808.available())
         {
             char c = serialBKSIM808.read();
             if (c != ',')
             {
                 data[i] += c;
-                delay(50);
+                //delay(100);
             }
             else
             {
@@ -208,11 +223,6 @@ int BKSIM808::getGpsData(const int timeout)
                 this->gpslongitude = data[4];
                 return 0;
             }
-        }
-        //DEBUG(i);
-        if (idxmaxloop >= maxloop)
-        {
-            return -1;
         }
     }
     return -1;
@@ -255,8 +265,16 @@ int BKSIM808::readBuffer(char* buffer, int count, unsigned int timeout)
     }
     if (DEBUGMODE)
     {
+        DEBUG("String readBuffer:");
+        DEBUG("\r\n");
         DEBUG(buffer);
         DEBUG("\r\n");
+        /*DEBUG("HEX readBuffer:");
+        DEBUG("\r\n");
+        for (int b = 0; b < count; b++)
+        {
+            Serial.println(buffer[b], HEX);
+        }*/
     }
     return 0;
 }
@@ -367,6 +385,7 @@ void BKSIM808::sendEndMark(void)
 
 void BKSIM808::sendDump(void)
 {
+    clearSerial();
     serialBKSIM808.println((char)240);
 }
 
@@ -514,9 +533,11 @@ int BKSIM808::gprsDisconnect(unsigned int timeout)
     if( 0 == sendCmdAndWaitForResp("AT+SAPBR=0,1\r\n", "OK\r\n", timeout) )
     {
         sendCmd("AT+HTTPTERM\r\n");
+        clearSerial();
         return 0;
     }
     sendCmd("AT+HTTPTERM\r\n");
+    clearSerial();
     return -1;
 
 }
@@ -545,19 +566,20 @@ int BKSIM808::sendWebserverJson(char* serverurl, char* device,char* volt,char* d
                         {
                             if( 0 == sendCmdAndWaitForResp("AT+HTTPACTION=1\r\n", "OK\r\n", timeout) )
                             {
+                                delay(12000);
                                 //sendCmd("WAIT=4\r\n");
+                                clearSerial();
                                 if( 0 == sendCmdAndWaitForResp("AT+HTTPREAD\r\n", "OK\r\n", timeout) )
                                 {
-                                    //sendCmd("WAIT=10\r\n");
-                                    delay(10000);
+                                    clearSerial();
                                     if( 0 == sendCmdAndWaitForResp("AT+HTTPSTATUS?\r\n", "OK\r\n", timeout) )
                                     {
-                                        delay(5000);
                                         if( 0 == sendCmdAndWaitForResp("AT+HTTPTERM\r\n", "OK\r\n", timeout) )
                                         {
-
                                             clearSerial();
-                                            waitForResp(",200\r\n", timeout);
+                                            //delay(10000);
+                                            //clearSerial();
+                                            //waitForResp(",200\r\n", timeout);
                                             //clearSerial();
                                             return 0;
                                         }
@@ -565,6 +587,7 @@ int BKSIM808::sendWebserverJson(char* serverurl, char* device,char* volt,char* d
                                         {
                                             ERROR("\r\nERROR:AT+HTTPTERM\r\n");
                                         }
+
                                     }
                                     else
                                     {
