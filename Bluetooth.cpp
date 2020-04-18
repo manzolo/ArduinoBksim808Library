@@ -108,9 +108,10 @@ int BlueTooth::scanForTargetDeviceName(char* deviceName)
     int bufferlen = 200;
     char blueBuffer[bufferlen];
     char *s;
+    clearSerial();
     cleanBuffer(blueBuffer, bufferlen);
-    sendCmd("AT+BTSCAN=1,10\r\n"); //scan 20s
-    readBufferRaw(blueBuffer,bufferlen,10);//+BTSCAN: 0,1,"E-test",34:43:0b:07:0f:58,-42
+    sendCmd("AT+BTSCAN=1,20\r\n"); //scan 20s
+    readBufferRaw(blueBuffer,bufferlen,20);//+BTSCAN: 0,1,"E-test",34:43:0b:07:0f:58,-42
     DEBUG(blueBuffer);
     if(NULL == (s = strstr(blueBuffer,deviceName)))
     {
@@ -123,12 +124,13 @@ int BlueTooth::scanForTargetDeviceName(char* deviceName)
 
 int BlueTooth::scanForTargetDeviceAddress(char* deviceName)
 {
-    int bufferlen = 2048;
+    int bufferlen = 512;
     char blueBuffer[bufferlen];
     char *s;
+    clearSerial();
     cleanBuffer(blueBuffer, bufferlen);
-    sendCmd("AT+BTSCAN=1,10\r\n"); //scan 20s
-    readBufferRaw(blueBuffer,bufferlen,10);//+BTPAIR: 1,"ME863",5c:6b:32:91:00:d1 --- +BTSCAN: 0,1,"E-test",34:43:0b:07:0f:58,-42
+    sendCmd("AT+BTSCAN=1,20\r\n"); //scan 20s
+    readBufferRaw(blueBuffer,bufferlen,20);//+BTPAIR: 1,"ME863",5c:6b:32:91:00:d1 --- +BTSCAN: 0,1,"E-test",34:43:0b:07:0f:58,-42
     if(NULL == (s = strstr(blueBuffer,deviceName)))
     {
         ERROR("\r\nERROR: scan For Target Device error\r\n");
