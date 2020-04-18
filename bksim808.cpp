@@ -129,7 +129,7 @@ int BKSIM808::gpsPowerOn(unsigned int timeout)
         //}
     }
 
-    delay(30000);
+    delay(35000);
     //sendCmdAndWaitForResp("AT+CGNSSEQ?\r\n", "OK\r\n", timeout);  // Define the last NMEA sentence that parsed
     //sendCmdAndWaitForResp("AT+CGNSSEQ=\"RMC\"\r\n", "OK\r\n", timeout);  // Define the last NMEA sentence that parsed
     //sendCmdAndWaitForResp("AT+CGNSSEQ?\r\n", "OK\r\n", timeout); // Define the last NMEA sentence that parsed
@@ -588,8 +588,10 @@ int BKSIM808::sendWebserverJson(char* serverurl, char* device,char* volt,char* d
                     sprintf(cmd, "AT+HTTPDATA=%d,100000\r\n",strlen(postParams));
                     if( 0 == sendCmdAndWaitForResp(cmd, "DOWNLOAD\r\n", timeout) )
                     {
+                        clearSerial();
                         if( 0 == sendCmdAndWaitForResp(postParams, "OK\r\n", timeout) )
                         {
+                            clearSerial();
                             if( 0 == sendCmdAndWaitForResp("AT+HTTPACTION=1\r\n", "OK\r\n", timeout) )
                             {
                                 delay(12000);
@@ -600,6 +602,7 @@ int BKSIM808::sendWebserverJson(char* serverurl, char* device,char* volt,char* d
                                     clearSerial();
                                     if( 0 == sendCmdAndWaitForResp("AT+HTTPSTATUS?\r\n", "OK\r\n", timeout) )
                                     {
+                                        clearSerial();
                                         if( 0 == sendCmdAndWaitForResp("AT+HTTPTERM\r\n", "OK\r\n", timeout) )
                                         {
                                             clearSerial();

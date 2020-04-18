@@ -65,6 +65,14 @@ public:
             0 on success
             -1 on error
     */
+    int forcePowerOff(void);
+
+    /** get host device name of BlueTooth module
+        @param  deviceName  buffer array to save device name.
+        @returns
+            0 on success
+            -1 on error
+    */
 
     int getHostDeviceName(char* deviceName);
 

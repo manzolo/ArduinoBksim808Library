@@ -44,6 +44,8 @@ int BlueTooth::powerOn(void)
             }
             else
             {
+                clearSerial();
+                delay(2000);
                 bluetoothPower = 1;
             }
         }
@@ -77,6 +79,13 @@ int BlueTooth::powerOff(void)
 
     }
     clearSerial();
+    return 0;
+}
+
+int BlueTooth::forcePowerOff(void)
+{
+    sendCmdAndWaitForResp("AT+BTPOWER=0\r\n", "OK", DEFAULT_TIMEOUT);
+    bluetoothPower = 0;
     return 0;
 }
 
@@ -277,9 +286,9 @@ int BlueTooth::connectInSPP(int deviceID)   //Serial Port Profile
     char cmd[cmdlen];
     char* s;
 
-    /*delay(1000);
+    delay(1000);
     clearSerial();
-    delay(1000);*/
+    //delay(1000);
     sprintf(cmd, "AT+BTGETPROF=%d\r\n", deviceID);
     sendCmd(cmd);
     //sendCmd("WAIT=4\r\n");
