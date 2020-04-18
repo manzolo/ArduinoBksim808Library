@@ -34,9 +34,10 @@ void BKSIM808::preInit(void)
 {
     //sendCmd("AT+CSCLK=0\r\n");
     while (sendATTest() != 0);
-    while (sendCmdAndWaitForResp("AT+cpin?\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
+    while (sendCmdAndWaitForResp("AT+cpin?\r\n", "OK\r\n", 50) != 0);
     sendCmd("WAIT=1\r\n");
     while (sendCmdAndWaitForResp("AT+CLCK=\"SC\",2\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
+    while (sendCmdAndWaitForResp("AT+CGREG?\r\n", "OK\r\n", 50) != 0);
     //while (sendCmdAndWaitForResp("AT+BTSTATUS?\r\n", "BTSTATUS: 0\r\n", 60) != 0);
     sendCmdTimeout("WAIT=6\r\n", 6);
     clearSerial();
@@ -60,7 +61,7 @@ void BKSIM808::preInit(void)
     sendCmdTimeout("AT+SAPBR=0,1\r\n", DEFAULT_TIMEOUT);
     //clearSerial();
     //sendCmd("AT+CSCLK=1\r\n");
-
+    gpsIsOn = false;
     //while (sendCmdAndWaitForResp("AT+BTSTATUS?\r\n", "BTSTATUS: 5", DEFAULT_TIMEOUT) != 0);
     if (DEBUGMODE)
     {
@@ -128,8 +129,15 @@ int BKSIM808::gpsPowerOn(unsigned int timeout)
         return -1;
         //}
     }
+    if (gpsIsOn)
+    {
+        delay(3000);
+    }
+    else
+    {
+        delay(45000);
 
-    delay(35000);
+    }
     //sendCmdAndWaitForResp("AT+CGNSSEQ?\r\n", "OK\r\n", timeout);  // Define the last NMEA sentence that parsed
     //sendCmdAndWaitForResp("AT+CGNSSEQ=\"RMC\"\r\n", "OK\r\n", timeout);  // Define the last NMEA sentence that parsed
     //sendCmdAndWaitForResp("AT+CGNSSEQ?\r\n", "OK\r\n", timeout); // Define the last NMEA sentence that parsed
@@ -205,6 +213,7 @@ int BKSIM808::getGpsData(const int timeout)
 
     if (String(Fixstatus)!="1" || latitude == nullptr || logitude == nullptr)
     {
+        gpsIsOn = false;
         return -1;
     }
 
@@ -212,6 +221,7 @@ int BKSIM808::getGpsData(const int timeout)
     this->gpslongitude = String(logitude);
     this->gpstimegps = String(UTCdatetime);
     this->gpsstate = String(Fixstatus);
+    gpsIsOn = true;
     return 0;
 }
 

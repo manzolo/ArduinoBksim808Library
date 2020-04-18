@@ -78,33 +78,81 @@ public:
     */
     void preInit(void);
 
+    /** Power on Gprs module
+    */
     int gprsConnect(char* apn, unsigned int timeout);
 
+    /** Power off Gprs module
+    */
     int gprsDisconnect(unsigned int timeout);
 
     int sendWebserverJson(char* serverurl, char* device,char* volt,char* data,char* temp,char* batteryperc,char* latitude,char* longitude,unsigned int timeout);
 
+    /** Reset Gps information
+    */
     void resetgpsinfo(void);
+
+    /** send sms from BKSIM808 module
+        @param  number  Number to send sms
+        @param  sms   Text to send sms
+        @param  timeout time to wait for reading from BKSIM808 module
+        @returns
+            0 on success
+            -1 on error
+    */
 
     int sendSmsMsg(char* number, char* sms, unsigned int timeout);
 
+    /** get Gps module informations
+        @param  timeout time to wait for reading from BKSIM808 module
+        @returns
+            0 on success
+            -1 on error
+    */
     int getGpsData(const int timeout);
 
+    /** Get Gps Latitude
+    */
     String getGpsLatitude();
 
+    /** Get Gps Longitude
+    */
     String getGpsLongitude();
 
+    /** Get Gps UTC time
+    */
     String getGpsTime();
 
+    /** read from Gps module Gps informations
+        @param  timeout time to wait for reading from BKSIM808 module
+        @returns
+            0 on success
+            -1 on error
+    */
     int getGpsInformation(int retry);
 
+    /** Try to power on Gps module
+    */
     int gpsPowerOn(unsigned int timeout);
 
+    /** Try to power off Gps module
+    */
     int gpsPowerOff(unsigned int timeout);
 
     /** Check if BKSIM808 readable
     */
     int checkReadable(void);
+
+    /** read from BKSIM808 module and save to buffer array (it convert \r\n to $
+        @param  buffer  buffer array to save what read from BKSIM808 module
+        @param  count   the maximal bytes number read from BKSIM808 module
+        @param  timeout time to wait for reading from BKSIM808 module
+        @returns
+            0 on success
+            -1 on error
+    */
+
+    int readBuffer(char* buffer, int count, unsigned int timeout = DEFAULT_TIMEOUT);
 
     /** read from BKSIM808 module and save to buffer array
         @param  buffer  buffer array to save what read from BKSIM808 module
@@ -115,7 +163,6 @@ public:
             -1 on error
     */
 
-    int readBuffer(char* buffer, int count, unsigned int timeout = DEFAULT_TIMEOUT);
     int readBufferRaw(char* buffer, int count, unsigned int timeout = DEFAULT_TIMEOUT);
 
 
@@ -130,6 +177,9 @@ public:
     */
     void sendCmd(const char* cmd);
 
+    /** send AT command and wait for response
+        @param cmd  command array which will be send to GPRS module
+    */
     void sendCmdTimeout(const char* cmd, unsigned int timeout = DEFAULT_TIMEOUT);
 
 
@@ -137,6 +187,8 @@ public:
     */
     int sendATTest(void);
 
+    /** send '0xF0' to BKSIM808 Module
+    */
     void sendDump(void);
 
     /** send '0x1A' to BKSIM808 Module
@@ -167,8 +219,16 @@ public:
     */
     void serialDebug(void);
 
+    /** used for clear serial buffer
+    */
     int clearSerial(void);
 
+    /** Gps On flag
+    */
+    bool gpsIsOn;
+
+    /** Board power pin
+    */
     int powerPin;
     SoftwareSerial serialBKSIM808;
 
