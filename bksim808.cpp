@@ -464,7 +464,7 @@ int BKSIM808::clearSerial(void)
             }
         }
         timerEnd = millis();
-        if (timerEnd - timerStart > 1000 * timeout)
+        if (timerEnd - timerStart > 1000 * 1)
         {
             break;
         }
@@ -594,14 +594,15 @@ int BKSIM808::sendWebserverJson(char* serverurl, char* device,char* volt,char* d
                             clearSerial();
                             if( 0 == sendCmdAndWaitForResp("AT+HTTPACTION=1\r\n", "OK\r\n", timeout) )
                             {
-                                delay(12000);
-                                //sendCmd("WAIT=4\r\n");
+                                waitForResp("HTTPACTION: 1,200,",15);
                                 clearSerial();
                                 if( 0 == sendCmdAndWaitForResp("AT+HTTPREAD\r\n", "OK\r\n", timeout) )
                                 {
+                                    waitForResp("HTTPREAD:", timeout);
                                     clearSerial();
                                     if( 0 == sendCmdAndWaitForResp("AT+HTTPSTATUS?\r\n", "OK\r\n", timeout) )
                                     {
+                                        waitForResp("HTTPSTATUS: POST,0,0,0", timeout);
                                         clearSerial();
                                         if( 0 == sendCmdAndWaitForResp("AT+HTTPTERM\r\n", "OK\r\n", timeout) )
                                         {
