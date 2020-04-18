@@ -116,6 +116,7 @@ public:
     */
 
     int readBuffer(char* buffer, int count, unsigned int timeout = DEFAULT_TIMEOUT);
+    int readBufferRaw(char* buffer, int count, unsigned int timeout = DEFAULT_TIMEOUT);
 
 
     /** clean Buffer

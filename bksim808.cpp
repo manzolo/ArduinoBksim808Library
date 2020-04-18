@@ -51,13 +51,13 @@ void BKSIM808::preInit(void)
 
     while (sendCmdAndWaitForResp("AT+CGMR\r\n", "Revision:1418B02SIM808M32_BT\r\n", DEFAULT_TIMEOUT) != 0);
     //Reset all connection after reboot
-    sendCmd("AT+BTPOWER?\r\n");
+    sendCmdTimeout("AT+BTPOWER?\r\n", DEFAULT_TIMEOUT);
     clearSerial();
-    sendCmd("AT+BTPOWER=0\r\n");
+    sendCmdTimeout("AT+BTPOWER=0\r\n", DEFAULT_TIMEOUT);
     clearSerial();
-    sendCmd("AT+CGNSPWR=0\r\n");
+    sendCmdTimeout("AT+CGNSPWR=0\r\n", DEFAULT_TIMEOUT);
     clearSerial();
-    sendCmd("AT+SAPBR=0,1\r\n");
+    sendCmdTimeout("AT+SAPBR=0,1\r\n", DEFAULT_TIMEOUT);
     //clearSerial();
     //sendCmd("AT+CSCLK=1\r\n");
 
@@ -118,9 +118,8 @@ void BKSIM808::resetgpsinfo()
 }
 int BKSIM808::gpsPowerOn(unsigned int timeout)
 {
-    //clearSerial();
+    clearSerial();
     resetgpsinfo();
-
     if( 0 != sendCmdAndWaitForResp("AT+CGNSPWR=1\r\n", "OK\r\n", timeout) )
     {
         //if( 0 != sendCmdAndWaitForResp("AT+CGNSPWR?\r\n", "OK\r\n", timeout) )
@@ -130,7 +129,7 @@ int BKSIM808::gpsPowerOn(unsigned int timeout)
         //}
     }
 
-    delay(35000);
+    delay(30000);
     //sendCmdAndWaitForResp("AT+CGNSSEQ?\r\n", "OK\r\n", timeout);  // Define the last NMEA sentence that parsed
     //sendCmdAndWaitForResp("AT+CGNSSEQ=\"RMC\"\r\n", "OK\r\n", timeout);  // Define the last NMEA sentence that parsed
     //sendCmdAndWaitForResp("AT+CGNSSEQ?\r\n", "OK\r\n", timeout); // Define the last NMEA sentence that parsed
@@ -188,45 +187,32 @@ int BKSIM808::getGpsInformation(int retry)
 }
 int BKSIM808::getGpsData(const int timeout)
 {
-    String data[5];
-    long int time = millis();
-    int i = 0;
+    char *Fixstatus;
+    char *UTCdatetime;
+    char *latitude;
+    char *logitude;
+    char gpsBuffer[200];
 
-    delay(500);
-    //clearSerial();
+    cleanBuffer(gpsBuffer,200);
     sendCmd("AT+CGNSINF\r\n");
+    readBufferRaw(gpsBuffer,200,DEFAULT_TIMEOUT);
 
-    while ((time + (timeout * 1000)) > millis())
+    char *field = strtok( gpsBuffer, "," ); // first field is GPS run status
+    Fixstatus = strtok( nullptr, "," ); // FIX status
+    UTCdatetime = strtok( nullptr, "," ); // UTC date/time
+    latitude = strtok( nullptr, "," ); // Lat
+    logitude = strtok( nullptr, "," ); // Lon
+
+    if (String(Fixstatus)!="1" || latitude == nullptr || logitude == nullptr)
     {
-        while (serialBKSIM808.available())
-        {
-            char c = serialBKSIM808.read();
-            if (c != ',')
-            {
-                data[i] += c;
-                //delay(100);
-            }
-            else
-            {
-                i++;
-            }
-            if (i == 5)
-            {
-                //delay(50);
-                if (data[1]!="1")
-                {
-                    break;
-                }
-                this->gpsstate = data[1];
-                this->gpstimegps = data[2];
-                this->gpslatitude = data[3];
-                this->gpslongitude = data[4];
-                return 0;
-            }
-        }
+        return -1;
     }
-    return -1;
 
+    this->gpslatitude = String(latitude);
+    this->gpslongitude = String(logitude);
+    this->gpstimegps = String(UTCdatetime);
+    this->gpsstate = String(Fixstatus);
+    return 0;
 }
 
 int BKSIM808::readBuffer(char* buffer, int count, unsigned int timeout)
@@ -275,6 +261,46 @@ int BKSIM808::readBuffer(char* buffer, int count, unsigned int timeout)
         {
             Serial.println(buffer[b], HEX);
         }*/
+    }
+    return 0;
+}
+
+int BKSIM808::readBufferRaw(char* buffer, int count, unsigned int timeout)
+{
+    int i = 0;
+    unsigned long timerStart, timerEnd;
+    timerStart = millis();
+    while (1)
+    {
+        while (serialBKSIM808.available())
+        {
+            char c = serialBKSIM808.read();
+            buffer[i++] = c;
+            if (i > count - 1)
+            {
+                break;
+            }
+        }
+        if (i > count - 1)
+        {
+            break;
+        }
+        timerEnd = millis();
+        if (timerEnd - timerStart > 1000 * timeout)
+        {
+            break;
+        }
+    }
+    while (serialBKSIM808.available())
+    {
+        serialBKSIM808.read();
+    }
+    if (DEBUGMODE)
+    {
+        DEBUG("String readBufferRaw:");
+        DEBUG("\r\n");
+        DEBUG(buffer);
+        DEBUG("\r\n");
     }
     return 0;
 }
