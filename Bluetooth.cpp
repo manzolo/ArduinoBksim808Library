@@ -392,7 +392,7 @@ int BlueTooth::sendInSPP(char* data)
     //clearSerial();
     sendCmd(data);
     sendEndMark();
-    return 0;
+    return waitForResp("SEND OK\r\n", DEFAULT_TIMEOUT);
 }
 
 int BlueTooth::dumpUsbkey()
@@ -405,5 +405,5 @@ int BlueTooth::dumpUsbkey()
     //clearSerial();
     sendDump();
     sendEndMark();
-    return 0;
+    return waitForResp("SEND OK\r\n", DEFAULT_TIMEOUT);
 }
