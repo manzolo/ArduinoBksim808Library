@@ -131,7 +131,7 @@ int BKSIM808::gpsPowerOn(unsigned int timeout)
 		}
 		if (gpsIsOn)
 		{
-				delay(3000);
+				delay(5000);
 		}
 		else
 		{
@@ -205,11 +205,11 @@ int BKSIM808::getGpsData(const int timeout)
 		sendCmd("AT+CGNSINF\r\n");
 		readBufferRaw(gpsBuffer,200,DEFAULT_TIMEOUT);
 
-		char *field = strtok( gpsBuffer, "," );                                                           // first field is GPS run status
-		Fixstatus = strtok( nullptr, "," );                                                           // FIX status
-		UTCdatetime = strtok( nullptr, "," );                                                           // UTC date/time
-		latitude = strtok( nullptr, "," );                                                           // Lat
-		logitude = strtok( nullptr, "," );                                                           // Lon
+		char *field = strtok( gpsBuffer, "," );                                                                       // first field is GPS run status
+		Fixstatus = strtok( nullptr, "," );                                                                       // FIX status
+		UTCdatetime = strtok( nullptr, "," );                                                                       // UTC date/time
+		latitude = strtok( nullptr, "," );                                                                       // Lat
+		logitude = strtok( nullptr, "," );                                                                       // Lon
 
 		if (String(Fixstatus)!="1" || latitude == nullptr || logitude == nullptr)
 		{
@@ -608,11 +608,11 @@ int BKSIM808::sendWebserverJson(char* serverurl, char* device,char* volt,char* d
 																clearSerial();
 																if( 0 == sendCmdAndWaitForResp("AT+HTTPREAD\r\n", "OK\r\n", timeout) )
 																{
-																		waitForResp("HTTPREAD:", timeout);
+																		waitForResp("HTTPREAD:", 15);
 																		clearSerial();
 																		if( 0 == sendCmdAndWaitForResp("AT+HTTPSTATUS?\r\n", "OK\r\n", timeout) )
 																		{
-																				waitForResp("HTTPSTATUS: POST,0,0,0", timeout);
+																				waitForResp("HTTPSTATUS: POST,0,0,0", 15);
 																				clearSerial();
 																				if( 0 == sendCmdAndWaitForResp("AT+HTTPTERM\r\n", "OK\r\n", timeout) )
 																				{
