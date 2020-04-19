@@ -26,7 +26,7 @@
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
-*/
+ */
 
 #ifndef __BLUETOOTH_H__
 #define __BLUETOOTH_H__
@@ -34,157 +34,157 @@
 #include "bksim808.h"
 /** BlueTooth class.
     used to communicate with BlueTooth Module
-*/
+ */
 class BlueTooth: public BKSIM808
 {
 public:
-    /** Create BlueTooth instance
-    */
-    BlueTooth(int baudRate = 9600): BKSIM808(baudRate)
-    {
-        bluetoothPower = 0;
-    };
+        /** Create BlueTooth instance
+         */
+        BlueTooth(int baudRate = 9600) : BKSIM808(baudRate)
+        {
+                bluetoothPower = 0;
+        };
 
-    /** power on BlueTooth module
-        @returns
-            0 on success
-            -1 on error
-    */
-    int powerOn(void);
+        /** power on BlueTooth module
+            @returns
+                0 on success
+                -1 on error
+         */
+        int powerOn(void);
 
-    /** power off BlueTooth module
-        @returns
-            0 on success
-            -1 on error
-    */
-    int powerOff(void);
+        /** power off BlueTooth module
+            @returns
+                0 on success
+                -1 on error
+         */
+        int powerOff(void);
 
-    /** get host device name of BlueTooth module
-        @param  deviceName  buffer array to save device name.
-        @returns
-            0 on success
-            -1 on error
-    */
-    int forcePowerOff(void);
+        /** get host device name of BlueTooth module
+            @param  deviceName  buffer array to save device name.
+            @returns
+                0 on success
+                -1 on error
+         */
+        int forcePowerOff(void);
 
-    /** get host device name of BlueTooth module
-        @param  deviceName  buffer array to save device name.
-        @returns
-            0 on success
-            -1 on error
-    */
+        /** get host device name of BlueTooth module
+            @param  deviceName  buffer array to save device name.
+            @returns
+                0 on success
+                -1 on error
+         */
 
-    int getHostDeviceName(char* deviceName);
+        int getHostDeviceName(char* deviceName);
 
-    /** scan for target device according to device name
-        @param  deviceName  device which will be scanned for
-        @returns
-            0 on success
-            -1 on error
-    */
-    int scanForTargetDeviceName(char* deviceName);
+        /** scan for target device according to device name
+            @param  deviceName  device which will be scanned for
+            @returns
+                0 on success
+                -1 on error
+         */
+        int scanForTargetDeviceName(char* deviceName);
 
-    /** send pairing request to device according to deviceID
-        @param  deviceID    deviceName  device which will be scanned for
-        @returns
-            0 on success
-            -1 on error
-    */
-    int scanForTargetDeviceAddress(char* deviceName);
+        /** send pairing request to device according to deviceID
+            @param  deviceID    deviceName  device which will be scanned for
+            @returns
+                0 on success
+                -1 on error
+         */
+        int scanForTargetDeviceAddress(char* deviceName);
 
-    /** send pairing request to device according to deviceID
-        @param  deviceID    deviceName  device which will be scanned for
-        @returns
-            0 on success
-            -1 on error
-    */
+        /** send pairing request to device according to deviceID
+            @param  deviceID    deviceName  device which will be scanned for
+            @returns
+                0 on success
+                -1 on error
+         */
 
-    int getDeviceId(char* deviceName);
+        int getDeviceId(char* deviceName);
 
-    /** send pairing request to device according to deviceID
-        @param  deviceID    deviceName  device which will be scanned for
-        @returns
-            0 on success
-            -1 on error
-    */
+        /** send pairing request to device according to deviceID
+            @param  deviceID    deviceName  device which will be scanned for
+            @returns
+                0 on success
+                -1 on error
+         */
 
 
-    int sendPairingReqstToDevice(int deviceID, int pin);
+        int sendPairingReqstToDevice(int deviceID, int pin);
 
-    /** accept other BlueTooth module's pairing request
-        @param  deviceID    device which will be scanned for
-        @param  pin    device pin
-        @returns
-            0 on success
-            -1 on error
-    */
-    int acceptPairing(void);
+        /** accept other BlueTooth module's pairing request
+            @param  deviceID    device which will be scanned for
+            @param  pin    device pin
+            @returns
+                0 on success
+                -1 on error
+         */
+        int acceptPairing(void);
 
-    /** unPair with paired BlueTooth device
-        @returns
-            0 on success
-            -1 on error
-    */
-    int unPair(int deviceID);
+        /** unPair with paired BlueTooth device
+            @returns
+                0 on success
+                -1 on error
+         */
+        int unPair(int deviceID);
 
-    /** accept other BlueTooth device's connecting request
-        @param  deviceID    device ID
-        @returns
-            0 on success
-            -1 on error
-    */
-    int acceptConnect(void);
+        /** accept other BlueTooth device's connecting request
+            @param  deviceID    device ID
+            @returns
+                0 on success
+                -1 on error
+         */
+        int acceptConnect(void);
 
-    /** wait to handle other BlueTooth device's pairing or connecting  request
-        @returns
-            0 on success
-            -1 on error
-    */
-    int loopHandle(void);
+        /** wait to handle other BlueTooth device's pairing or connecting  request
+            @returns
+                0 on success
+                -1 on error
+         */
+        int loopHandle(void);
 
-    /** disconnect with connected BlueTooth device
-        @param  deviceID    device that will be disconnected
-        @returns
-            0 on success
-            -1 on error
-    */
-    int disconnect(int deviceID);
+        /** disconnect with connected BlueTooth device
+            @param  deviceID    device that will be disconnected
+            @returns
+                0 on success
+                -1 on error
+         */
+        int disconnect(int deviceID);
 
-    /** connect with other BlueTooth device in SPP profile
-        @param  deviceID    device that will be connect in SPP profile
-        @returns
-            0 on success
-            -1 on error
-    */
-    int connectInSPP(int deviceID);
+        /** connect with other BlueTooth device in SPP profile
+            @param  deviceID    device that will be connect in SPP profile
+            @returns
+                0 on success
+                -1 on error
+         */
+        int connectInSPP(int deviceID);
 
-    /** receive data in SPP profile
-        @param  data    buffer array to receive data from other BlueTooth device in SPP profile
-        @returns
-            0 on success
-            -1 on error
-    */
-    int recvInSPP(char* data);
+        /** receive data in SPP profile
+            @param  data    buffer array to receive data from other BlueTooth device in SPP profile
+            @returns
+                0 on success
+                -1 on error
+         */
+        int recvInSPP(char* data);
 
-    /** send data in SPP profile
-        @param  data    buffer array to send data to other BlueTooth device in SPP profile
-        @returns
-            0 on success
-            -1 on error
-    */
-    int sendInSPP(char* data);
+        /** send data in SPP profile
+            @param  data    buffer array to send data to other BlueTooth device in SPP profile
+            @returns
+                0 on success
+                -1 on error
+         */
+        int sendInSPP(char* data);
 
-    int dumpUsbkey();
+        int dumpUsbkey();
 
 private:
 
-    /** BlueTooth power flag
-    */
-    bool bluetoothPower;
+        /** BlueTooth power flag
+         */
+        bool bluetoothPower;
 
-    /** target device ID
-    */
-    int targetDeviceID;
+        /** target device ID
+         */
+        int targetDeviceID;
 };
 
 #endif
