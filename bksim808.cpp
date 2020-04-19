@@ -34,10 +34,12 @@ void BKSIM808::preInit(void)
 {
 		//sendCmd("AT+CSCLK=0\r\n");
 		while (sendATTest() != 0);
-		while (sendCmdAndWaitForResp("AT+cpin?\r\n", "OK\r\n", 50) != 0);
-		sendCmd("WAIT=1\r\n");
-		while (sendCmdAndWaitForResp("AT+CLCK=\"SC\",2\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
-		while (sendCmdAndWaitForResp("AT+CGREG?\r\n", "OK\r\n", 50) != 0);
+		if (!DEBUGMODE){
+				while (sendCmdAndWaitForResp("AT+cpin?\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
+				sendCmd("WAIT=1\r\n");
+				while (sendCmdAndWaitForResp("AT+CLCK=\"SC\",2\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
+				while (sendCmdAndWaitForResp("AT+CGREG?\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
+		}
 		//while (sendCmdAndWaitForResp("AT+BTSTATUS?\r\n", "BTSTATUS: 0\r\n", 60) != 0);
 		sendCmdTimeout("WAIT=6\r\n", 6);
 		clearSerial();
@@ -205,11 +207,11 @@ int BKSIM808::getGpsData(const int timeout)
 		sendCmd("AT+CGNSINF\r\n");
 		readBufferRaw(gpsBuffer,200,DEFAULT_TIMEOUT);
 
-		char *field = strtok( gpsBuffer, "," );                                                                       // first field is GPS run status
-		Fixstatus = strtok( nullptr, "," );                                                                       // FIX status
-		UTCdatetime = strtok( nullptr, "," );                                                                       // UTC date/time
-		latitude = strtok( nullptr, "," );                                                                       // Lat
-		logitude = strtok( nullptr, "," );                                                                       // Lon
+		char *field = strtok( gpsBuffer, "," );                                                                                               // first field is GPS run status
+		Fixstatus = strtok( nullptr, "," );                                                                                               // FIX status
+		UTCdatetime = strtok( nullptr, "," );                                                                                               // UTC date/time
+		latitude = strtok( nullptr, "," );                                                                                               // Lat
+		logitude = strtok( nullptr, "," );                                                                                               // Lon
 
 		if (String(Fixstatus)!="1" || latitude == nullptr || logitude == nullptr)
 		{

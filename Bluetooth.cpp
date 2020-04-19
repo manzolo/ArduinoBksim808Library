@@ -289,7 +289,7 @@ int BlueTooth::connectInSPP(int deviceID)   //Serial Port Profile
 		delay(1000);
 		clearSerial();
 		//delay(1000);
-		sprintf(cmd, "AT+BTGETPROF=%d\r\n", deviceID);
+		snprintf(cmd,cmdlen, "AT+BTGETPROF=%d\r\n", deviceID);
 		sendCmd(cmd);
 		//sendCmd("WAIT=4\r\n");
 		readBufferRaw(blueBuffer, bufferlen, DEFAULT_TIMEOUT);
@@ -305,7 +305,7 @@ int BlueTooth::connectInSPP(int deviceID)   //Serial Port Profile
 		cleanBuffer(blueBuffer, bufferlen);
 		cleanBuffer(cmd, cmdlen);
 		clearSerial();
-		sprintf(cmd, "AT+BTCONNECT=%d,%d\r\n", deviceID, 4);
+		snprintf(cmd, cmdlen,"AT+BTCONNECT=%d,%d\r\n", deviceID, 4);
 		if (0 != sendCmdAndWaitForResp(cmd, "OK\r\n", DEFAULT_TIMEOUT))
 		{
 				ERROR("\r\nERROR:AT+BTCONNECT\r\n");
@@ -397,9 +397,9 @@ int BlueTooth::sendInSPP(char* data)
 
 int BlueTooth::dumpUsbkey()
 {
-		if (0 != sendCmdAndWaitForResp("AT+BTSPPSEND\r\n", ">", DEFAULT_TIMEOUT))
+		if (0 != sendCmdAndWaitForResp("AT+BTSPPSEND=2\r\n", ">", DEFAULT_TIMEOUT))
 		{
-				ERROR("\r\nERROR:AT+BTSPPSEND\r\n");
+				ERROR("\r\nERROR:AT+BTSPPSEND=2\r\n");
 				return -1;
 		}
 		//clearSerial();
