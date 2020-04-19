@@ -43,7 +43,7 @@
 
 #define UART_DEBUG
 
-#define DEBUGMODE true
+#define DEBUGMODE FALSE
 
 #ifdef UART_DEBUG
 #define ERROR(x)            if (DEBUGMODE) {Serial.print(x);}
