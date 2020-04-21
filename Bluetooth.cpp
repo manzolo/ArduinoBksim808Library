@@ -390,7 +390,7 @@ int BlueTooth::sendInSPP(char* data)
 				ERROR("\r\nERROR:AT+BTSPPSEND\r\n");
 				return -1;
 		}
-		//clearSerial();
+		clearSerial();
 		sendCmd(data);
 		sendEndMark();
 		return waitForResp("SEND OK\r\n", DEFAULT_TIMEOUT);
@@ -403,7 +403,7 @@ int BlueTooth::dumpUsbkey()
 				ERROR("\r\nERROR:AT+BTSPPSEND=2\r\n");
 				return -1;
 		}
-		//clearSerial();
+		clearSerial();
 		sendDump();
 		sendEndMark();
 		return waitForResp("SEND OK\r\n", DEFAULT_TIMEOUT);
