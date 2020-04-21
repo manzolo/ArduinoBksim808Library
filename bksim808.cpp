@@ -34,27 +34,32 @@ void BKSIM808::preInit(void)
 {
 		//sendCmd("AT+CSCLK=0\r\n");
 		while (sendATTest() != 0);
+		while (sendATTest() != 0);
 		if (WAITFORGSM) {
 				do {
 						clearSerial();
 						delay(1000);
 				} while (sendCmdAndWaitForResp("AT+CPIN?\r\n", "CPIN: READY\r\n", DEFAULT_TIMEOUT) != 0);
 
-				do {
+				/*do {
 						//sendCmd("WAIT=1\r\n");
 						clearSerial();
 						delay(1000);
-				} while (sendCmdAndWaitForResp("AT+CLCK=\"SC\",2\r\n", "CLCK: 0\r\n", DEFAULT_TIMEOUT) != 0);
+				} while (sendCmdAndWaitForResp("AT+CLCK=\"SC\",2\r\n", "CLCK: 0\r\n", 20) != 0);*/
 
 				do {
 						clearSerial();
 						delay(3000);
-				} while (sendCmdAndWaitForResp("AT+CREG?\r\n", "CREG: 1,", DEFAULT_TIMEOUT) != 0);
+				} while (sendCmdAndWaitForResp("AT+CREG?\r\n", "CREG: 1,", 20) != 0);
 
 				do {
 						clearSerial();
 						delay(3000);
-				} while (sendCmdAndWaitForResp("AT+CGREG?\r\n", "CGREG: 0,1\r\n", DEFAULT_TIMEOUT) != 0);
+				} while (sendCmdAndWaitForResp("AT+CSCS=\"GSM\"\r\n", "OK\r\n", 20) != 0);
+				/*do {
+				                clearSerial();
+				                delay(3000);
+				   } while (sendCmdAndWaitForResp("AT+CGREG?\r\n", "CGREG: 0,1\r\n", 10) != 0);*/
 
 		}
 		do {
@@ -102,13 +107,6 @@ int BKSIM808::sendSmsMsg(char* number, char* sms, unsigned int timeout)
 {
 		//put the modem into text mode
 		char cmd[100];
-		if (0 != sendCmdAndWaitForResp("AT+CSCS=\"GSM\"\r\n", "OK\r\n", timeout))
-		{
-				ERROR("\r\nERROR:AT+CSCS=\"GSM\"\r\n");
-				return -1;
-		}
-
-
 		if (0 != sendCmdAndWaitForResp("AT+CMGF=1\r\n", "OK\r\n", timeout))
 		{
 				ERROR("\r\nERROR:AT+CMGF\r\n");
@@ -238,11 +236,11 @@ int BKSIM808::getGpsData(const int timeout)
 		sendCmd("AT+CGNSINF\r\n");
 		readBufferRaw(gpsBuffer,200,DEFAULT_TIMEOUT);
 
-		char *field = strtok( gpsBuffer, "," );                                                                                                                                               // first field is GPS run status
-		Fixstatus = strtok( nullptr, "," );                                                                                                                                               // FIX status
-		UTCdatetime = strtok( nullptr, "," );                                                                                                                                               // UTC date/time
-		latitude = strtok( nullptr, "," );                                                                                                                                               // Lat
-		logitude = strtok( nullptr, "," );                                                                                                                                               // Lon
+		char *field = strtok( gpsBuffer, "," );                                                                                                                                                                                   // first field is GPS run status
+		Fixstatus = strtok( nullptr, "," );                                                                                                                                                                                   // FIX status
+		UTCdatetime = strtok( nullptr, "," );                                                                                                                                                                                   // UTC date/time
+		latitude = strtok( nullptr, "," );                                                                                                                                                                                   // Lat
+		logitude = strtok( nullptr, "," );                                                                                                                                                                                   // Lon
 
 		if (String(Fixstatus)!="1" || latitude == nullptr || logitude == nullptr)
 		{
