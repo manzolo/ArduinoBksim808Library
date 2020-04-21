@@ -34,15 +34,36 @@ void BKSIM808::preInit(void)
 {
 		//sendCmd("AT+CSCLK=0\r\n");
 		while (sendATTest() != 0);
-		if (!DEBUGMODE){
-				while (sendCmdAndWaitForResp("AT+cpin?\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
-				sendCmd("WAIT=1\r\n");
-				while (sendCmdAndWaitForResp("AT+CLCK=\"SC\",2\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
-				while (sendCmdAndWaitForResp("AT+CGREG?\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
+		if (WAITFORGSM) {
+				do {
+						clearSerial();
+						delay(1000);
+				} while (sendCmdAndWaitForResp("AT+CPIN?\r\n", "CPIN: READY\r\n", DEFAULT_TIMEOUT) != 0);
+
+				do {
+						//sendCmd("WAIT=1\r\n");
+						clearSerial();
+						delay(1000);
+				} while (sendCmdAndWaitForResp("AT+CLCK=\"SC\",2\r\n", "CLCK: 0\r\n", DEFAULT_TIMEOUT) != 0);
+
+				do {
+						clearSerial();
+						delay(3000);
+				} while (sendCmdAndWaitForResp("AT+CREG?\r\n", "CREG: 1,", DEFAULT_TIMEOUT) != 0);
+
+				do {
+						clearSerial();
+						delay(3000);
+				} while (sendCmdAndWaitForResp("AT+CGREG?\r\n", "CGREG: 0,1\r\n", DEFAULT_TIMEOUT) != 0);
+
 		}
+		do {
+				clearSerial();
+				delay(5000);
+		} while (sendCmdAndWaitForResp("AT+BTPOWER?\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
 		//while (sendCmdAndWaitForResp("AT+BTSTATUS?\r\n", "BTSTATUS: 0\r\n", 60) != 0);
-		sendCmdTimeout("WAIT=6\r\n", 6);
-		clearSerial();
+		//sendCmdTimeout("WAIT=6\r\n", 6);
+		//clearSerial();
 		//while (sendCmdAndWaitForResp("AT\r\n", "Call Ready\r\n", 60) != 0);
 		//clearSerial();
 		while (sendCmdAndWaitForResp("AT\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
@@ -54,13 +75,13 @@ void BKSIM808::preInit(void)
 
 		while (sendCmdAndWaitForResp("AT+CGMR\r\n", "Revision:1418B02SIM808M32_BT\r\n", DEFAULT_TIMEOUT) != 0);
 		//Reset all connection after reboot
-		sendCmdTimeout("AT+BTPOWER?\r\n", DEFAULT_TIMEOUT);
-		clearSerial();
-		sendCmdTimeout("AT+BTPOWER=0\r\n", DEFAULT_TIMEOUT);
-		clearSerial();
-		sendCmdTimeout("AT+CGNSPWR=0\r\n", DEFAULT_TIMEOUT);
-		clearSerial();
-		sendCmdTimeout("AT+SAPBR=0,1\r\n", DEFAULT_TIMEOUT);
+		//sendCmdTimeout("AT+BTPOWER?\r\n", DEFAULT_TIMEOUT);
+		//clearSerial();
+		//sendCmdTimeout("AT+BTPOWER=0\r\n", DEFAULT_TIMEOUT);
+		//clearSerial();
+		//sendCmdTimeout("AT+CGNSPWR=0\r\n", DEFAULT_TIMEOUT);
+		//clearSerial();
+		//sendCmdTimeout("AT+SAPBR=0,1\r\n", DEFAULT_TIMEOUT);
 		//clearSerial();
 		//sendCmd("AT+CSCLK=1\r\n");
 		gpsIsOn = false;
@@ -81,20 +102,30 @@ int BKSIM808::sendSmsMsg(char* number, char* sms, unsigned int timeout)
 {
 		//put the modem into text mode
 		char cmd[100];
-		if (0 != sendCmdAndWaitForResp("AT+CMGF=1\r\n", "OK", timeout))
+		if (0 != sendCmdAndWaitForResp("AT+CSCS=\"GSM\"\r\n", "OK\r\n", timeout))
+		{
+				ERROR("\r\nERROR:AT+CSCS=\"GSM\"\r\n");
+				return -1;
+		}
+
+
+		if (0 != sendCmdAndWaitForResp("AT+CMGF=1\r\n", "OK\r\n", timeout))
 		{
 				ERROR("\r\nERROR:AT+CMGF\r\n");
 				return -1;
 		}
+		delay(50);
 		sprintf(cmd, "AT+CMGS=\"%s\"\r\n", number);
 		if (0 != sendCmdAndWaitForResp(cmd, ">", timeout))
 		{
 				ERROR("\r\nERROR:AT+CMGS\r\n");
 				return -1;
 		}
+		delay(1000);
+		//serialBKSIM808.println("* * * Arduino GSM start * * *");
 		sendCmd(sms);
 		sendEndMark();
-		return 0;
+		return waitForResp("OK\r\n",timeout);
 }
 
 String BKSIM808::getGpsLatitude()
@@ -207,11 +238,11 @@ int BKSIM808::getGpsData(const int timeout)
 		sendCmd("AT+CGNSINF\r\n");
 		readBufferRaw(gpsBuffer,200,DEFAULT_TIMEOUT);
 
-		char *field = strtok( gpsBuffer, "," );                                                                                               // first field is GPS run status
-		Fixstatus = strtok( nullptr, "," );                                                                                               // FIX status
-		UTCdatetime = strtok( nullptr, "," );                                                                                               // UTC date/time
-		latitude = strtok( nullptr, "," );                                                                                               // Lat
-		logitude = strtok( nullptr, "," );                                                                                               // Lon
+		char *field = strtok( gpsBuffer, "," );                                                                                                                                               // first field is GPS run status
+		Fixstatus = strtok( nullptr, "," );                                                                                                                                               // FIX status
+		UTCdatetime = strtok( nullptr, "," );                                                                                                                                               // UTC date/time
+		latitude = strtok( nullptr, "," );                                                                                                                                               // Lat
+		logitude = strtok( nullptr, "," );                                                                                                                                               // Lon
 
 		if (String(Fixstatus)!="1" || latitude == nullptr || logitude == nullptr)
 		{
@@ -400,13 +431,14 @@ int BKSIM808::waitForResp(const char* resp, unsigned int timeout)
 				timerEnd = millis();
 				if (timerEnd - timerStart > 1000 * timeout)
 				{
+						DEBUG(buffer);
 						return -1;
 				}
 		}
 
 		while (serialBKSIM808.available())
 		{
-				serialBKSIM808.read();
+				DEBUG(serialBKSIM808.read());
 		}
 		if (DEBUGMODE)
 		{
@@ -423,7 +455,6 @@ void BKSIM808::sendEndMark(void)
 
 void BKSIM808::sendDump(void)
 {
-		clearSerial();
 		serialBKSIM808.println((char)240);
 }
 
@@ -494,7 +525,7 @@ int BKSIM808::clearSerial(void)
 }
 int BKSIM808::gprsConnect(char* apn, unsigned int timeout)
 {
-		char cmd[1024];
+		char cmd[40];
 		//sendCmd("AT+SAPBR=0,1\r\n");
 		if( 0 == sendCmdAndWaitForResp("AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"\r\n", "OK\r\n", timeout) )
 		{
@@ -580,11 +611,11 @@ int BKSIM808::gprsDisconnect(unsigned int timeout)
 
 }
 
-int BKSIM808::sendWebserverJson(char* serverurl, char* device,char* volt,char* data,char* temp,char* batteryperc,char* latitude,char* longitude,unsigned int timeout)
+int BKSIM808::sendWebserverPostData(char* serverurl, char* postParams,unsigned int timeout)
 {
 
 		char cmd[1024];
-		char postParams[1024];
+
 		sendCmd("WAIT=6\r\n");
 		if( 0 == sendCmdAndWaitForResp("AT+HTTPINIT\r\n", "OK\r\n", timeout) )
 		{
@@ -596,7 +627,6 @@ int BKSIM808::sendWebserverJson(char* serverurl, char* device,char* volt,char* d
 						{
 								if( 0 == sendCmdAndWaitForResp("AT+HTTPPARA=\"CONTENT\",\"application/json\"\r\n", "OK\r\n", timeout) )
 								{
-										sprintf(postParams, "{\"device\" : \"%s\",  \"volt\" : \"%s\" ,\"data\" : \"%s\",  \"temp\" : \"%s\",   \"batteryperc\" : \"%s\",  \"latitude\" : \"%s\", \"longitude\" : \"%s\" }",device,volt,data,temp,batteryperc,latitude,longitude);
 										sprintf(cmd, "AT+HTTPDATA=%d,100000\r\n",strlen(postParams));
 										if( 0 == sendCmdAndWaitForResp(cmd, "DOWNLOAD\r\n", timeout) )
 										{

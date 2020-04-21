@@ -44,6 +44,7 @@
 #define UART_DEBUG
 
 #define DEBUGMODE false
+#define WAITFORGSM true
 
 #ifdef UART_DEBUG
 #define ERROR(x)            if (DEBUGMODE) {Serial.print(x);}
@@ -86,7 +87,7 @@ public:
          */
         int gprsDisconnect(unsigned int timeout);
 
-        int sendWebserverJson(char* serverurl, char* device,char* volt,char* data,char* temp,char* batteryperc,char* latitude,char* longitude,unsigned int timeout);
+        int sendWebserverPostData(char* serverurl, char* postParams,unsigned int timeout);
 
         /** Reset Gps information
          */
