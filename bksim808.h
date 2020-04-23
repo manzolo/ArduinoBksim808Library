@@ -43,8 +43,8 @@
 
 #define UART_DEBUG
 
-#define DEBUGMODE false
-#define WAITFORGSM true
+#define DEBUGMODE FALSE
+#define WAITFORGSM TRUE
 
 #ifdef UART_DEBUG
 #define ERROR(x)            if (DEBUGMODE) {Serial.print(x);}
@@ -144,6 +144,8 @@ public:
          */
         int checkReadable(void);
 
+        int waitForSerialReady(void);
+
         /** read from BKSIM808 module and save to buffer array (it convert \r\n to $
             @param  buffer  buffer array to save what read from BKSIM808 module
             @param  count   the maximal bytes number read from BKSIM808 module
@@ -222,7 +224,9 @@ public:
 
         /** used for clear serial buffer
          */
-        int clearSerial(void);
+        int cleanSerialBuffer(void);
+
+        int isSerialReady(unsigned timeout);
 
         /** Gps On flag
          */

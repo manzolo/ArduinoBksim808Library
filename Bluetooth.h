@@ -164,10 +164,11 @@ public:
                 0 on success
                 -1 on error
          */
-        int recvInSPP(char* data);
+        int recvInSPP(char* data, int bufferlen);
 
         /** send data in SPP profile
-            @param  data    buffer array to send data to other BlueTooth device in SPP profile
+           @param  data    buffer array to send data to other BlueTooth device in SPP profile
+           @param  bufferlen    buffer length
             @returns
                 0 on success
                 -1 on error

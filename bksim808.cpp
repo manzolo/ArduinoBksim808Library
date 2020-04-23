@@ -37,60 +37,48 @@ void BKSIM808::preInit(void)
 		while (sendATTest() != 0);
 		if (WAITFORGSM) {
 				do {
-						clearSerial();
+						//clearSerial();
 						delay(1000);
 				} while (sendCmdAndWaitForResp("AT+CPIN?\r\n", "CPIN: READY\r\n", DEFAULT_TIMEOUT) != 0);
 
-				/*do {
+				do {
 						//sendCmd("WAIT=1\r\n");
-						clearSerial();
+						//clearSerial();
 						delay(1000);
-				} while (sendCmdAndWaitForResp("AT+CLCK=\"SC\",2\r\n", "CLCK: 0\r\n", 20) != 0);*/
+				} while (sendCmdAndWaitForResp("AT+CLCK=\"SC\",2\r\n", "CLCK: 0\r\n", DEFAULT_TIMEOUT) != 0);
 
 				do {
-						clearSerial();
+						//clearSerial();
 						delay(3000);
-				} while (sendCmdAndWaitForResp("AT+CREG?\r\n", "CREG: 1,", 20) != 0);
+				} while (sendCmdAndWaitForResp("AT+CREG?\r\n", "CREG: 1,1\r\n", DEFAULT_TIMEOUT) != 0);
 
 				do {
-						clearSerial();
+						//clearSerial();
 						delay(3000);
-				} while (sendCmdAndWaitForResp("AT+CSCS=\"GSM\"\r\n", "OK\r\n", 20) != 0);
+				} while (sendCmdAndWaitForResp("AT+CSCS=\"GSM\"\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
 				/*do {
-				                clearSerial();
+				                //clearSerial();
 				                delay(3000);
 				   } while (sendCmdAndWaitForResp("AT+CGREG?\r\n", "CGREG: 0,1\r\n", 10) != 0);*/
 
 		}
 		do {
-				clearSerial();
+				//clearSerial();
 				delay(5000);
 		} while (sendCmdAndWaitForResp("AT+BTPOWER?\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
-		//while (sendCmdAndWaitForResp("AT+BTSTATUS?\r\n", "BTSTATUS: 0\r\n", 60) != 0);
 		//sendCmdTimeout("WAIT=6\r\n", 6);
-		//clearSerial();
-		//while (sendCmdAndWaitForResp("AT\r\n", "Call Ready\r\n", 60) != 0);
-		//clearSerial();
+		////clearSerial();
 		while (sendCmdAndWaitForResp("AT\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
-		clearSerial();
+		//clearSerial();
 		if (DEBUGMODE)
 		{
 				while (sendCmdAndWaitForResp("AT+CMEE=2\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
 		}
 
 		while (sendCmdAndWaitForResp("AT+CGMR\r\n", "Revision:1418B02SIM808M32_BT\r\n", DEFAULT_TIMEOUT) != 0);
-		//Reset all connection after reboot
-		//sendCmdTimeout("AT+BTPOWER?\r\n", DEFAULT_TIMEOUT);
-		//clearSerial();
-		//sendCmdTimeout("AT+BTPOWER=0\r\n", DEFAULT_TIMEOUT);
-		//clearSerial();
-		//sendCmdTimeout("AT+CGNSPWR=0\r\n", DEFAULT_TIMEOUT);
-		//clearSerial();
-		//sendCmdTimeout("AT+SAPBR=0,1\r\n", DEFAULT_TIMEOUT);
-		//clearSerial();
+		////clearSerial();
 		//sendCmd("AT+CSCLK=1\r\n");
 		gpsIsOn = false;
-		//while (sendCmdAndWaitForResp("AT+BTSTATUS?\r\n", "BTSTATUS: 5", DEFAULT_TIMEOUT) != 0);
 		if (DEBUGMODE)
 		{
 				DEBUG("BkSim808 ready...\r\n");
@@ -150,7 +138,7 @@ void BKSIM808::resetgpsinfo()
 }
 int BKSIM808::gpsPowerOn(unsigned int timeout)
 {
-		clearSerial();
+		//clearSerial();
 		resetgpsinfo();
 		if( 0 != sendCmdAndWaitForResp("AT+CGNSPWR=1\r\n", "OK\r\n", timeout) )
 		{
@@ -172,14 +160,14 @@ int BKSIM808::gpsPowerOn(unsigned int timeout)
 		//sendCmdAndWaitForResp("AT+CGNSSEQ?\r\n", "OK\r\n", timeout);  // Define the last NMEA sentence that parsed
 		//sendCmdAndWaitForResp("AT+CGNSSEQ=\"RMC\"\r\n", "OK\r\n", timeout);  // Define the last NMEA sentence that parsed
 		//sendCmdAndWaitForResp("AT+CGNSSEQ?\r\n", "OK\r\n", timeout); // Define the last NMEA sentence that parsed
-		clearSerial();
+		//clearSerial();
 		//sendCmd("WAIT=6\r\n");
 		return 0;
 }
 
 int BKSIM808::gpsPowerOff(unsigned int timeout)
 {
-		clearSerial();
+		//clearSerial();
 		if( 0 != sendCmdAndWaitForResp("AT+CGNSPWR=0\r\n", "OK\r\n", timeout) )
 		{
 				//if( 0 != sendCmdAndWaitForResp("AT+CGNSPWR?\r\n", "OK\r\n", timeout) )
@@ -236,11 +224,11 @@ int BKSIM808::getGpsData(const int timeout)
 		sendCmd("AT+CGNSINF\r\n");
 		readBufferRaw(gpsBuffer,200,DEFAULT_TIMEOUT);
 
-		char *field = strtok( gpsBuffer, "," );                                                                                                                                                                                   // first field is GPS run status
-		Fixstatus = strtok( nullptr, "," );                                                                                                                                                                                   // FIX status
-		UTCdatetime = strtok( nullptr, "," );                                                                                                                                                                                   // UTC date/time
-		latitude = strtok( nullptr, "," );                                                                                                                                                                                   // Lat
-		logitude = strtok( nullptr, "," );                                                                                                                                                                                   // Lon
+		char *field = strtok( gpsBuffer, "," );                                                                                                                                                                                                           // first field is GPS run status
+		Fixstatus = strtok( nullptr, "," );                                                                                                                                                                                                           // FIX status
+		UTCdatetime = strtok( nullptr, "," );                                                                                                                                                                                                           // UTC date/time
+		latitude = strtok( nullptr, "," );                                                                                                                                                                                                           // Lat
+		logitude = strtok( nullptr, "," );                                                                                                                                                                                                           // Lon
 
 		if (String(Fixstatus)!="1" || latitude == nullptr || logitude == nullptr)
 		{
@@ -332,17 +320,14 @@ int BKSIM808::readBufferRaw(char* buffer, int count, unsigned int timeout)
 						break;
 				}
 		}
+		DEBUG("String readBufferRaw:");
 		while (serialBKSIM808.available())
 		{
-				serialBKSIM808.read();
+				DEBUG(serialBKSIM808.read());
 		}
-		if (DEBUGMODE)
-		{
-				DEBUG("String readBufferRaw:");
-				DEBUG("\r\n");
-				DEBUG(buffer);
-				DEBUG("\r\n");
-		}
+		DEBUG("\r\n");
+		DEBUG(buffer);
+		DEBUG("\r\n");
 		return 0;
 }
 
@@ -446,6 +431,28 @@ int BKSIM808::waitForResp(const char* resp, unsigned int timeout)
 		return 0;
 }
 
+int BKSIM808::isSerialReady(unsigned timeout){
+		int ret = 0;
+		unsigned long timerStart, timerEnd;
+		timerStart = millis();
+
+		while (1)
+		{
+				if (checkReadable())
+				{
+						ret = 1;
+						break;
+				}
+				timerEnd = millis();
+				if (timerEnd - timerStart > 1000 * timeout)
+				{
+						break;
+				}
+
+		}
+		return ret;
+}
+
 void BKSIM808::sendEndMark(void)
 {
 		serialBKSIM808.println((char)26);
@@ -482,7 +489,7 @@ void BKSIM808::serialDebug(void)
 		}
 }
 
-int BKSIM808::clearSerial(void)
+int BKSIM808::cleanSerialBuffer(void)
 {
 		String buffer;
 		int timeout = 1;
@@ -600,11 +607,11 @@ int BKSIM808::gprsDisconnect(unsigned int timeout)
 		if( 0 == sendCmdAndWaitForResp("AT+SAPBR=0,1\r\n", "OK\r\n", timeout) )
 		{
 				sendCmd("AT+HTTPTERM\r\n");
-				clearSerial();
+				//clearSerial();
 				return 0;
 		}
 		sendCmd("AT+HTTPTERM\r\n");
-		clearSerial();
+		//clearSerial();
 		return -1;
 
 }
@@ -628,29 +635,29 @@ int BKSIM808::sendWebserverPostData(char* serverurl, char* postParams,unsigned i
 										sprintf(cmd, "AT+HTTPDATA=%d,100000\r\n",strlen(postParams));
 										if( 0 == sendCmdAndWaitForResp(cmd, "DOWNLOAD\r\n", timeout) )
 										{
-												clearSerial();
+												//clearSerial();
 												if( 0 == sendCmdAndWaitForResp(postParams, "OK\r\n", timeout) )
 												{
-														clearSerial();
+														//clearSerial();
 														if( 0 == sendCmdAndWaitForResp("AT+HTTPACTION=1\r\n", "OK\r\n", timeout) )
 														{
 																waitForResp("HTTPACTION: 1,200,",15);
-																clearSerial();
+																//clearSerial();
 																if( 0 == sendCmdAndWaitForResp("AT+HTTPREAD\r\n", "OK\r\n", timeout) )
 																{
 																		waitForResp("HTTPREAD:", 15);
-																		clearSerial();
+																		//clearSerial();
 																		if( 0 == sendCmdAndWaitForResp("AT+HTTPSTATUS?\r\n", "OK\r\n", timeout) )
 																		{
 																				waitForResp("HTTPSTATUS: POST,0,0,0", 15);
-																				clearSerial();
+																				//clearSerial();
 																				if( 0 == sendCmdAndWaitForResp("AT+HTTPTERM\r\n", "OK\r\n", timeout) )
 																				{
-																						clearSerial();
+																						//clearSerial();
 																						//delay(10000);
-																						//clearSerial();
+																						////clearSerial();
 																						//waitForResp(",200\r\n", timeout);
-																						//clearSerial();
+																						////clearSerial();
 																						return 0;
 																				}
 																				else
