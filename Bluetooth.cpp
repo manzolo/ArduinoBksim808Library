@@ -98,12 +98,13 @@ int BlueTooth::getHostDeviceName(char* deviceName)
 		int i = 0;
 		sendCmd("AT+BTHOST?\r\n");
 		readBufferRaw(blueBuffer,bufferlen,DEFAULT_TIMEOUT);
+		//+BTHOST: SIM808,48:e6:c0:18:62:60
 		if(NULL == (s = strstr(blueBuffer,"+BTHOST:")))
 		{
 				ERROR("\r\nERROR: get host device name error\r\n");
 				return -1;
 		}
-		p = s + 9;                                                                                                            //+BTHOST: SIM808,48:e6:c0:18:62:60
+		p = s + 9;
 		while(*(p) != ',')
 		{
 				deviceName[i++] = *p;
@@ -120,8 +121,10 @@ int BlueTooth::scanForTargetDeviceName(char* deviceName)
 		char *s;
 		//clearSerial();
 		cleanBuffer(blueBuffer, bufferlen);
-		sendCmd("AT+BTSCAN=1,20\r\n");                                                                                                             //scan 20s
-		readBufferRaw(blueBuffer,bufferlen,20);                                                                                                            //+BTSCAN: 0,1,"E-test",34:43:0b:07:0f:58,-42
+		//+BTSCAN: 0,1,"E-test",34:43:0b:07:0f:58,-42
+		//scan 20s
+		sendCmd("AT+BTSCAN=1,20\r\n");
+		readBufferRaw(blueBuffer,bufferlen,20);
 		DEBUG(blueBuffer);
 		if(NULL == (s = strstr(blueBuffer,deviceName)))
 		{
@@ -139,13 +142,16 @@ int BlueTooth::scanForTargetDeviceAddress(char* deviceName)
 		char *s;
 		//clearSerial();
 		cleanBuffer(blueBuffer, bufferlen);
-		sendCmd("AT+BTSCAN=1,20\r\n");                                                                                                             //scan 20s
-		readBufferRaw(blueBuffer,bufferlen,25);                                                                                                            //+BTPAIR: 1,"ME863",5c:6b:32:91:00:d1 --- +BTSCAN: 0,1,"E-test",34:43:0b:07:0f:58,-42
+		//scan 20s
+		sendCmd("AT+BTSCAN=1,20\r\n");
+		readBufferRaw(blueBuffer,bufferlen,25);
 		if(NULL == (s = strstr(blueBuffer,deviceName)))
 		{
 				ERROR("\r\nERROR: scan For Target Device error\r\n");
 				return -1;
 		}
+		//+BTSCAN: 0,1,"E-test",34:43:0b:07:0f:58,-42
+		//+BTPAIR: 1,"ME863",5c:6b:32:91:00:d1 
 		targetDeviceID = atoi(s-11);
 		waitForResp("BTSCAN: 1", 25);
 		cleanSerialBuffer();
@@ -161,7 +167,8 @@ int BlueTooth::getDeviceId(char* deviceName)
 		//clearSerial();
 		sendCmd("AT+BTSTATUS?\r\n");
 		//DEBUG(blueBuffer);
-		readBufferRaw(blueBuffer,bufferlen,10);                                                                                                            //less than 10 sec connection problem
+		//less than 10 sec connection problem
+		readBufferRaw(blueBuffer,bufferlen,10);
 		//clearSerial();
 		if(NULL == (s = strstr(blueBuffer,deviceName)))
 		{
@@ -199,16 +206,8 @@ int BlueTooth::sendPairingReqstToDevice(int deviceID, int pin)
 				return -1;
 		}
 		waitForResp("BTPAIR: ", 5);
-		cleanSerialBuffer();//clearSerial pairing issue
-		//delay(5000);
-		//waitForResp("BTPAIR\r\n", 20);
-		//cleanSerialBuffer();
-		/*if(0 != sendCmdAndWaitForResp("BTSTATUS?\r\n", "BTSTATUS: 0\r\n", 5))
-		   {
-		                ERROR("\r\nERROR: BTSTATUS?\r\n");
-		                return -1;
-		   }*/
-
+		//clearSerial pairing issue
+		cleanSerialBuffer();
 		return 0;
 }
 int BlueTooth::unPair(int deviceID)
@@ -250,7 +249,8 @@ int BlueTooth::disconnect(int deviceID)
 				ERROR("\r\nERROR: AT+BTDISCONN\r\n");
 				return -1;
 		}
-		return 0;
+
+		return waitForResp("\"SPP\"", DEFAULT_TIMEOUT);
 }
 
 int BlueTooth::loopHandle(void)
@@ -289,7 +289,7 @@ int BlueTooth::loopHandle(void)
 
 int BlueTooth::connectInSPP(int deviceID)   //Serial Port Profile
 {
-		int bufferlen = 200;
+		int bufferlen = 100;
 		int cmdlen = 20;
 		char blueBuffer[bufferlen];
 		char cmd[cmdlen];
@@ -301,18 +301,19 @@ int BlueTooth::connectInSPP(int deviceID)   //Serial Port Profile
 		snprintf(cmd,cmdlen, "AT+BTGETPROF=%d\r\n", deviceID);
 		sendCmd(cmd);
 		//sendCmd("WAIT=4\r\n");
-		readBufferRaw(blueBuffer, bufferlen, 10);
+		readBufferRaw(blueBuffer, bufferlen, 20);
 		if (NULL == (s = strstr(blueBuffer, "\"SPP\"")))
 		{
 				ERROR("\r\nERROR: No SPP Profile\r\n");
 				cleanSerialBuffer();
 				return -1;
 		}
-		waitForResp("OK\r\n",DEFAULT_TIMEOUT);
-		//DEBUG("\r\nSPP:OK\r\n");
-		cleanBuffer(blueBuffer, bufferlen);
 		cleanBuffer(cmd, cmdlen);
-		snprintf(cmd, cmdlen,"AT+BTCONNECT=%d,%d\r\n", deviceID, 4);
+		sprintf(cmd,"AT+BTCONNECT=%d,%c\r\n", deviceID, *(s - 2));
+		//DEBUG(*(s - 2));
+		waitForResp("OK\r\n",10);
+		//cleanSerialBuffer();
+		//DEBUG("\r\nSPP:OK\r\n");
 		if (0 != sendCmdAndWaitForResp(cmd, "OK\r\n", DEFAULT_TIMEOUT))
 		{
 				ERROR("\r\nERROR:AT+BTCONNECT\r\n");
@@ -365,6 +366,7 @@ int BlueTooth::recvInSPP(char* data, int bufferlen)
 				else
 				{
 						ERROR("\r\nERROR: get data error\r\n");
+						cleanSerialBuffer();
 						return -1;
 				}
 				cleanSerialBuffer();

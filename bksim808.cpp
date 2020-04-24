@@ -39,6 +39,36 @@ void BKSIM808::preInit(void)
 				do {
 						//clearSerial();
 						delay(1000);
+				} while (sendCmdAndWaitForResp("AT&W\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
+				do {
+						//clearSerial();
+						delay(1000);
+				} while (sendCmdAndWaitForResp("AT+CFUN=0\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
+				do {
+						//clearSerial();
+						delay(1000);
+				} while (sendCmdAndWaitForResp("AT+CFUN=1,1\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
+				do {
+						//clearSerial();
+						delay(1000);
+				} while (sendCmdAndWaitForResp("ATE0\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
+				do {
+						//clearSerial();
+						delay(1000);
+				} while (sendCmdAndWaitForResp("AT+GMM\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
+				do {
+						//clearSerial();
+						delay(1000);
+				} while (sendCmdAndWaitForResp("AT+CLTS=1\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
+				do {
+						//clearSerial();
+						delay(1000);
+				} while (sendCmdAndWaitForResp("AT+CBATCHK=1\r\n", "OK\r\n", DEFAULT_TIMEOUT) != 0);
+
+
+				do {
+						//clearSerial();
+						delay(1000);
 				} while (sendCmdAndWaitForResp("AT+CPIN?\r\n", "CPIN: READY\r\n", DEFAULT_TIMEOUT) != 0);
 
 				do {
@@ -110,6 +140,7 @@ int BKSIM808::sendSmsMsg(char* number, char* sms, unsigned int timeout)
 		delay(1000);
 		//serialBKSIM808.println("* * * Arduino GSM start * * *");
 		sendCmd(sms);
+		delay(500);
 		sendEndMark();
 		return waitForResp("OK\r\n",timeout);
 }
@@ -224,11 +255,12 @@ int BKSIM808::getGpsData(const int timeout)
 		sendCmd("AT+CGNSINF\r\n");
 		readBufferRaw(gpsBuffer,200,DEFAULT_TIMEOUT);
 
-		char *field = strtok( gpsBuffer, "," );                                                                                                                                                                                                           // first field is GPS run status
-		Fixstatus = strtok( nullptr, "," );                                                                                                                                                                                                           // FIX status
-		UTCdatetime = strtok( nullptr, "," );                                                                                                                                                                                                           // UTC date/time
-		latitude = strtok( nullptr, "," );                                                                                                                                                                                                           // Lat
-		logitude = strtok( nullptr, "," );                                                                                                                                                                                                           // Lon
+		// first field is GPS run status
+		char *field = strtok( gpsBuffer, "," );
+		Fixstatus = strtok( nullptr, "," );
+		UTCdatetime = strtok( nullptr, "," );
+		latitude = strtok( nullptr, "," );
+		logitude = strtok( nullptr, "," );
 
 		if (String(Fixstatus)!="1" || latitude == nullptr || logitude == nullptr)
 		{
@@ -415,6 +447,7 @@ int BKSIM808::waitForResp(const char* resp, unsigned int timeout)
 				if (timerEnd - timerStart > 1000 * timeout)
 				{
 						DEBUG(buffer);
+						DEBUG("\r\n");
 						return -1;
 				}
 		}
@@ -423,11 +456,8 @@ int BKSIM808::waitForResp(const char* resp, unsigned int timeout)
 		{
 				DEBUG(serialBKSIM808.read());
 		}
-		if (DEBUGMODE)
-		{
-				DEBUG(buffer);
-				DEBUG("\r\n");
-		}
+		DEBUG(buffer);
+		DEBUG("\r\n");
 		return 0;
 }
 
@@ -497,10 +527,7 @@ int BKSIM808::cleanSerialBuffer(void)
 		unsigned long timerStart, timerEnd;
 		timerStart = millis();
 
-		if (DEBUGMODE)
-		{
-				DEBUG("****START CLEAR SERIAL BUFFER****\r\n");
-		}
+		DEBUG("****START CLEAR SERIAL BUFFER****\r\n");
 		while (1)
 		{
 				if (serialBKSIM808.available())
@@ -519,11 +546,8 @@ int BKSIM808::cleanSerialBuffer(void)
 
 		}
 
-		if (DEBUGMODE)
-		{
-				DEBUG(buffer);
-				DEBUG("****END CLEAR SERIAL BUFFER****\r\n");
-		}
+		DEBUG(buffer);
+		DEBUG("****END CLEAR SERIAL BUFFER****\r\n");
 		return 0;
 
 
