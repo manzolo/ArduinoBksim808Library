@@ -45,6 +45,7 @@
 
 #define DEBUGMODE FALSE
 #define WAITFORGSM TRUE
+#define WAITFORGPS TRUE
 
 #ifdef UART_DEBUG
 #define ERROR(x)            if (DEBUGMODE) {Serial.print(x);}

@@ -77,6 +77,8 @@ void BKSIM808::preInit(void)
 						delay(1000);
 				} while (sendCmdAndWaitForResp("AT+CLCK=\"SC\",2\r\n", "CLCK: 0\r\n", DEFAULT_TIMEOUT) != 0);
 
+				sendCmd("WAIT=5\r\n");
+
 				do {
 						//clearSerial();
 						delay(3000);
@@ -630,11 +632,11 @@ int BKSIM808::gprsDisconnect(unsigned int timeout)
 {
 		if( 0 == sendCmdAndWaitForResp("AT+SAPBR=0,1\r\n", "OK\r\n", timeout) )
 		{
-				sendCmd("AT+HTTPTERM\r\n");
+				//sendCmd("AT+HTTPTERM\r\n");
 				//clearSerial();
 				return 0;
 		}
-		sendCmd("AT+HTTPTERM\r\n");
+		//sendCmd("AT+HTTPTERM\r\n");
 		//clearSerial();
 		return -1;
 
