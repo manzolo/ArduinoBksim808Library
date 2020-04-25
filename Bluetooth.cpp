@@ -27,7 +27,10 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
  */
-
+/*
+   Info:
+   https://www.raviyp.com/sim800-series-bluetooth-at-commands/
+ */
 #include "Bluetooth.h"
 int BlueTooth::powerOn(void)
 {
@@ -151,7 +154,7 @@ int BlueTooth::scanForTargetDeviceAddress(char* deviceName)
 				return -1;
 		}
 		//+BTSCAN: 0,1,"E-test",34:43:0b:07:0f:58,-42
-		//+BTPAIR: 1,"ME863",5c:6b:32:91:00:d1 
+		//+BTPAIR: 1,"ME863",5c:6b:32:91:00:d1
 		targetDeviceID = atoi(s-11);
 		waitForResp("BTSCAN: 1", 25);
 		cleanSerialBuffer();
