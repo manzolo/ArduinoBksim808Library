@@ -27,7 +27,10 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
  */
-
+/*
+   Info:
+   https://www.raviyp.com/sim800-series-bluetooth-at-commands/
+ */
 #include "Bluetooth.h"
 int BlueTooth::powerOn(void)
 {
@@ -124,7 +127,7 @@ int BlueTooth::scanForTargetDeviceName(char* deviceName)
 		//+BTSCAN: 0,1,"E-test",34:43:0b:07:0f:58,-42
 		//scan 20s
 		sendCmd("AT+BTSCAN=1,20\r\n");
-		readBufferRaw(blueBuffer,bufferlen,20);
+		readBufferRaw(blueBuffer,bufferlen,30);
 		DEBUG(blueBuffer);
 		if(NULL == (s = strstr(blueBuffer,deviceName)))
 		{
@@ -151,7 +154,7 @@ int BlueTooth::scanForTargetDeviceAddress(char* deviceName)
 				return -1;
 		}
 		//+BTSCAN: 0,1,"E-test",34:43:0b:07:0f:58,-42
-		//+BTPAIR: 1,"ME863",5c:6b:32:91:00:d1 
+		//+BTPAIR: 1,"ME863",5c:6b:32:91:00:d1
 		targetDeviceID = atoi(s-11);
 		waitForResp("BTSCAN: 1", 25);
 		cleanSerialBuffer();
@@ -238,12 +241,13 @@ int BlueTooth::acceptConnect(void)
 		}
 		return 0;
 }
-int BlueTooth::disconnect(int deviceID)
+int BlueTooth::disconnect(int targetDeviceID)
 {
-		char cmd[30];
+		int buflen = 30;
+		char cmd[buflen];
 		if(0 == targetDeviceID)
 				return -1;
-		sprintf(cmd,"AT+BTDISCONN=%d\r\n",targetDeviceID);
+		snprintf(cmd,buflen,"AT+BTDISCONN=%i\r\n",1);
 		if(0 != sendCmdAndWaitForResp(cmd, "OK", DEFAULT_TIMEOUT))
 		{
 				ERROR("\r\nERROR: AT+BTDISCONN\r\n");
@@ -298,7 +302,7 @@ int BlueTooth::connectInSPP(int deviceID)   //Serial Port Profile
 		delay(1000);
 		//clearSerial();
 		//delay(1000);
-		snprintf(cmd,cmdlen, "AT+BTGETPROF=%d\r\n", deviceID);
+		snprintf(cmd,cmdlen, "AT+BTGETPROF=%i\r\n", deviceID);
 		sendCmd(cmd);
 		//sendCmd("WAIT=4\r\n");
 		readBufferRaw(blueBuffer, bufferlen, 20);
