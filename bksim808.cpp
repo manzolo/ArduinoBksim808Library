@@ -80,9 +80,6 @@ void BKSIM808::boot(void)
 						delay(1000);
 				} while (sendCmdAndWaitForResp("AT+CLCK=\"SC\",2\r\n", "CLCK: 0\r\n", BOOT_TIMEOUT) != 0);
 
-				//sendCmd("WAIT=5\r\n");
-				//delay(5000);
-
 				do {
 						cleanSerialBuffer();
 						delay(3000);
@@ -93,8 +90,7 @@ void BKSIM808::boot(void)
 						delay(3000);
 				} while (sendCmdAndWaitForResp("AT+CSCS=\"GSM\"\r\n", "OK\r\n", BOOT_TIMEOUT) != 0);
 				/*do {
-				                //clearSerial();
-				                delay(3000);
+				    delay(3000);
 				   } while (sendCmdAndWaitForResp("AT+CGREG?\r\n", "CGREG: 0,1\r\n", 10) != 0);*/
 
 		}
@@ -563,7 +559,7 @@ int BKSIM808::gprsConnect(char* apn, unsigned int timeout)
 {
 		char cmd[40];
 		/*do {
-			delay(3000);
+		        delay(3000);
 		   } while (sendCmdAndWaitForResp("AT+CGREG?\r\n", "CGREG: 0,1\r\n", 10) != 0);*/
 		//sendCmd("AT+SAPBR=0,1\r\n");
 		if( 0 == sendCmdAndWaitForResp("AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"\r\n", "OK\r\n", timeout) )
