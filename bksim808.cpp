@@ -562,6 +562,9 @@ int BKSIM808::cleanSerialBuffer(void)
 int BKSIM808::gprsConnect(char* apn, unsigned int timeout)
 {
 		char cmd[40];
+		do {
+			delay(3000);
+		   } while (sendCmdAndWaitForResp("AT+CGREG?\r\n", "CGREG: 0,1\r\n", 10) != 0);
 		//sendCmd("AT+SAPBR=0,1\r\n");
 		if( 0 == sendCmdAndWaitForResp("AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"\r\n", "OK\r\n", timeout) )
 		{
