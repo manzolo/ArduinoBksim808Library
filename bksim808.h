@@ -56,6 +56,7 @@
 #endif
 
 #define DEFAULT_TIMEOUT     5
+#define BOOT_TIMEOUT     15
 /** BKSIM808 class.
     Used for BKSIM808 communication. attention that BKSIM808 module communicate with MCU in serial protocol
  */
@@ -76,9 +77,9 @@ public:
                 //pinMode(powerPin, OUTPUT);
                 serialBKSIM808.begin(baudRate);
         };
-        /** Power on BKSIM808
+        /** Boot BKSIM808
          */
-        void preInit(void);
+        void boot(void);
 
         /** Power on Gprs module
          */
