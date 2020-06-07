@@ -35,59 +35,63 @@ void BKSIM808::boot(void)
 		//sendCmd("AT+CSCLK=0\r\n");
 		while (sendATTest() != 0);
 		while (sendATTest() != 0);
+		if (DEBUGMODE)
+		{
+				while (sendCmdAndWaitForResp("AT+CMEE=2\r\n", "OK\r\n", BOOT_TIMEOUT) != 0);
+		}
 		if (WAITFORGSM) {
 				do {
 						cleanSerialBuffer();
-						delay(1000);
+						delay(500);
 				} while (sendCmdAndWaitForResp("AT&W\r\n", "OK\r\n", BOOT_TIMEOUT) != 0);
 				do {
 						cleanSerialBuffer();
-						delay(1000);
+						delay(500);
 				} while (sendCmdAndWaitForResp("AT+CFUN=0\r\n", "OK\r\n", BOOT_TIMEOUT) != 0);
 				do {
 						cleanSerialBuffer();
-						delay(1000);
+						delay(500);
 				} while (sendCmdAndWaitForResp("AT+CFUN=1,1\r\n", "OK\r\n", BOOT_TIMEOUT) != 0);
 
 				do {
 						cleanSerialBuffer();
-						delay(1000);
+						delay(500);
 				} while (sendCmdAndWaitForResp("ATE0\r\n", "OK\r\n", BOOT_TIMEOUT) != 0);
 
 				do {
 						cleanSerialBuffer();
-						delay(1000);
+						delay(500);
 				} while (sendCmdAndWaitForResp("AT+GMM\r\n", "OK\r\n", BOOT_TIMEOUT) != 0);
 
 				do {
 						cleanSerialBuffer();
-						delay(1000);
+						delay(500);
 				} while (sendCmdAndWaitForResp("AT+CLTS=1\r\n", "OK\r\n", BOOT_TIMEOUT) != 0);
 				do {
 						cleanSerialBuffer();
-						delay(1000);
+						delay(500);
 				} while (sendCmdAndWaitForResp("AT+CBATCHK=1\r\n", "OK\r\n", BOOT_TIMEOUT) != 0);
 
 
 				do {
 						cleanSerialBuffer();
-						delay(1000);
+						delay(500);
 				} while (sendCmdAndWaitForResp("AT+CPIN?\r\n", "CPIN: READY\r\n", BOOT_TIMEOUT) != 0);
 
 				do {
 						cleanSerialBuffer();
 						//clearSerial();
-						delay(1000);
+						delay(500);
 				} while (sendCmdAndWaitForResp("AT+CLCK=\"SC\",2\r\n", "CLCK: 0\r\n", BOOT_TIMEOUT) != 0);
 
 				do {
 						cleanSerialBuffer();
-						delay(3000);
-				} while (sendCmdAndWaitForResp("AT+CREG?\r\n", "CREG: 1,1\r\n", BOOT_TIMEOUT) != 0);
+						delay(500);
+				} while (sendCmdAndWaitForResp("AT+CREG?\r\n", "CREG: 0,1\r\n", BOOT_TIMEOUT) != 0);
 
 				do {
 						cleanSerialBuffer();
-						delay(3000);
+						delay(500);
 				} while (sendCmdAndWaitForResp("AT+CSCS=\"GSM\"\r\n", "OK\r\n", BOOT_TIMEOUT) != 0);
 				/*do {
 				    delay(3000);
@@ -102,10 +106,6 @@ void BKSIM808::boot(void)
 		cleanSerialBuffer();
 		while (sendCmdAndWaitForResp("AT\r\n", "OK\r\n", BOOT_TIMEOUT) != 0);
 		// cleanSerialBuffer();
-		if (DEBUGMODE)
-		{
-				while (sendCmdAndWaitForResp("AT+CMEE=2\r\n", "OK\r\n", BOOT_TIMEOUT) != 0);
-		}
 
 		cleanSerialBuffer();
 		while (sendCmdAndWaitForResp("AT+CGMR\r\n", "Revision:1418B02SIM808M32_BT\r\n", BOOT_TIMEOUT) != 0);

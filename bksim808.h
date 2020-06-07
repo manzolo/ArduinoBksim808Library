@@ -56,7 +56,7 @@
 #endif
 
 #define DEFAULT_TIMEOUT     5
-#define BOOT_TIMEOUT     15
+#define BOOT_TIMEOUT     3
 /** BKSIM808 class.
     Used for BKSIM808 communication. attention that BKSIM808 module communicate with MCU in serial protocol
  */
